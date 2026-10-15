@@ -1,4 +1,3 @@
-// Auto-detect local vs production backend
 const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://localhost:5000/api'
   : 'https://subbhu-play-api.onrender.com/api';
@@ -18,7 +17,7 @@ const gameConfigs = {
   },
   'crash': {
     title: 'Crash Multiplier',
-    rule: 'Cash out before rocket crash',
+    rule: 'Cash out before crash',
     options: `<option value="1.5">Cash out 1.5x</option><option value="2.0">Cash out 2.0x</option><option value="3.0">Cash out 3.0x</option>`
   },
   'slots': {
@@ -47,8 +46,22 @@ window.switchGame = function(game) {
   document.getElementById('active-title').innerText = config.title;
   document.getElementById('rule-badge').innerText = config.rule;
   document.getElementById('game-choice').innerHTML = config.options;
-  document.getElementById('game-result').innerText = 'Ready to play virtual round.';
+  document.getElementById('game-result').innerText = 'Ready to play simulation.';
 };
+
+async function fetchTelemetry() {
+  try {
+    const res = await fetch(`${API_BASE}/analytics/summary`);
+    const data = await res.json();
+    const m = data.metrics;
+    document.getElementById('stat-winrate').innerText = `${m.winRate}%`;
+    document.getElementById('stat-roi').innerText = `${m.roi}%`;
+    document.getElementById('stat-rounds').innerText = m.totalRounds;
+    document.getElementById('stat-volatility').innerText = m.volatility;
+  } catch(e) {
+    console.error('Analytics telemetry error', e);
+  }
+}
 
 async function syncWallet() {
   try {
@@ -60,7 +73,7 @@ async function syncWallet() {
     if (data.history && data.history.length > 0) {
       ledgerEl.innerHTML = data.history.reverse().map(tx => `
         <div class="tx-item">
-          <span>${tx.type} ${tx.reason ? '• ' + tx.reason : ''}</span>
+          <span>${tx.type} ${tx.game ? '(' + tx.game + ')' : ''}</span>
           <span style="color: ${tx.amount > 0 || tx.payout > 0 ? '#34d399' : '#f87171'}">
             ${tx.amount ? (tx.amount > 0 ? '+' : '') + tx.amount : (tx.netChange >= 0 ? '+' : '') + tx.netChange}
           </span>
@@ -79,15 +92,24 @@ async function loadSports() {
     const list = document.getElementById('sports-list');
     list.innerHTML = json.data.map(m => `
       <div class="match-item">
-        <div>
-          <div style="font-weight:700; font-size:0.85rem;">${m.teams}</div>
-          <div style="font-size:0.7rem; color:var(--text-muted);">${m.sport} • ${m.score}</div>
+        <div class="match-head">
+          <div>
+            <div style="font-weight:700; font-size:0.85rem;">${m.teams}</div>
+            <div style="font-size:0.7rem; color:var(--text-muted);">${m.sport} • ${m.score}</div>
+          </div>
+          <span class="status-pill">${m.status}</span>
         </div>
-        <span class="status-pill">${m.status}</span>
+        <div class="prob-bar-wrapper">
+          <span>Win Prob:</span>
+          <div class="prob-bar">
+            <div class="prob-fill" style="width: ${m.analytics.winProbA}%"></div>
+          </div>
+          <span>${m.analytics.winProbA}%</span>
+        </div>
       </div>
     `).join('');
   } catch (err) {
-    document.getElementById('sports-list').innerHTML = `<p style="font-size:0.75rem; color:#f87171;">Start Node server to view live demo matches.</p>`;
+    document.getElementById('sports-list').innerHTML = `<p style="font-size:0.75rem; color:#f87171;">Node server required for sports analytics.</p>`;
   }
 }
 
@@ -95,7 +117,7 @@ window.playCurrentGame = async function() {
   const betCoins = Number(document.getElementById('bet-coins').value);
   const choice = document.getElementById('game-choice').value;
   const resultEl = document.getElementById('game-result');
-  resultEl.innerText = 'Calculating simulation...';
+  resultEl.innerText = 'Processing simulation...';
 
   try {
     const res = await fetch(`${API_BASE}/games/play`, {
@@ -109,12 +131,13 @@ window.playCurrentGame = async function() {
       resultEl.innerHTML = `${data.won ? '🎉 WIN' : '❌ LOSS'} | ${data.detail} (${data.won ? '+' + data.payout : '-' + betCoins} coins)`;
       resultEl.style.color = data.won ? '#34d399' : '#f87171';
       syncWallet();
+      fetchTelemetry();
     } else {
-      resultEl.innerText = data.error || 'Play error';
+      resultEl.innerText = data.error || 'Execution failure';
       resultEl.style.color = '#f87171';
     }
   } catch (err) {
-    resultEl.innerText = 'Network error: Node Backend not reachable.';
+    resultEl.innerText = 'Network error: Backend unreachable.';
     resultEl.style.color = '#f87171';
   }
 };
@@ -124,11 +147,12 @@ window.claimDaily = async function() {
     const res = await fetch(`${API_BASE}/wallet/claim-daily`, { method: 'POST' });
     const data = await res.json();
     if (data.success) {
-      alert(`Claimed +${data.added} virtual demo coins!`);
+      alert(`+${data.added} Coins added!`);
       syncWallet();
+      fetchTelemetry();
     }
   } catch (e) {
-    alert('Claim failed: Server connection required');
+    alert('Daily claim failed');
   }
 };
 
@@ -141,23 +165,23 @@ window.executeAdminAdjust = async function() {
     const res = await fetch(`${API_BASE}/admin/adjust-coins`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ adminKey: key, amount: coins, reason: 'Admin panel test' })
+      body: JSON.stringify({ adminKey: key, amount: coins })
     });
     const data = await res.json();
     if (res.ok) {
-      status.innerText = `Adjusted balance: ${data.newBalance} coins`;
+      status.innerText = `Balance adjusted to ${data.newBalance}`;
       status.style.color = '#34d399';
       syncWallet();
     } else {
-      status.innerText = data.error || 'Admin failure';
+      status.innerText = data.error;
       status.style.color = '#f87171';
     }
   } catch (e) {
-    status.innerText = 'Error connecting to admin route';
+    status.innerText = 'Error connecting admin API';
     status.style.color = '#f87171';
   }
 };
 
-// Initial calls
 loadSports();
 syncWallet();
+fetchTelemetry();

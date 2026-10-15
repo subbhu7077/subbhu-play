@@ -1,6 +1,6 @@
 :root {
-  --bg-dark: #080d1a;
-  --card-bg: rgba(16, 24, 40, 0.75);
+  --bg-dark: #070b14;
+  --card-bg: rgba(14, 21, 37, 0.82);
   --cyan: #00f2fe;
   --purple: #9d4edd;
   --green: #10b981;
@@ -15,22 +15,32 @@ body { background: var(--bg-dark); color: var(--text-main); min-height: 100vh; p
 
 header {
   display: flex; justify-content: space-between; align-items: center; padding: 12px 16px;
-  background: rgba(8, 13, 26, 0.95); border-bottom: 1px solid var(--border);
+  background: rgba(7, 11, 20, 0.95); border-bottom: 1px solid var(--border);
   position: sticky; top: 0; z-index: 100; backdrop-filter: blur(12px);
 }
 .logo { font-size: 1.15rem; font-weight: 800; background: linear-gradient(90deg, var(--cyan), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 .header-right { display: flex; align-items: center; gap: 8px; }
-.claim-btn { background: #064e3b; color: #34d399; border: 1px solid #059669; padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; cursor: pointer; }
+.claim-btn { background: #064e3b; color: #34d399; border: 1px solid #059669; padding: 5px 9px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; cursor: pointer; }
 .badge { background: #1e293b; color: var(--cyan); border: 1px solid var(--border); padding: 5px 10px; border-radius: 20px; font-weight: 700; font-size: 0.82rem; }
 
 .container { padding: 14px; max-width: 550px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
 .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 16px; backdrop-filter: blur(10px); }
 .card-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-h2 { font-size: 1rem; color: var(--cyan); text-transform: uppercase; letter-spacing: 0.5px; }
+h2 { font-size: 0.95rem; color: var(--cyan); text-transform: uppercase; letter-spacing: 0.5px; }
 .demo-tag { font-size: 0.65rem; background: rgba(0, 242, 254, 0.15); color: var(--cyan); padding: 2px 6px; border-radius: 4px; font-weight: 700; }
 
-.sports-container { display: flex; flex-direction: column; gap: 8px; }
-.match-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; background: rgba(2, 6, 23, 0.6); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); }
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.stat-box { background: rgba(2, 6, 23, 0.6); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 8px; text-align: center; }
+.stat-num { display: block; font-size: 0.95rem; font-weight: 800; color: #38bdf8; }
+.stat-lbl { font-size: 0.62rem; color: var(--text-muted); text-transform: uppercase; margin-top: 2px; }
+
+.sports-container { display: flex; flex-direction: column; gap: 10px; }
+.match-item { background: rgba(2, 6, 23, 0.6); border-radius: 8px; border: 1px solid rgba(255,255,255,0.05); padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+.match-head { display: flex; justify-content: space-between; align-items: center; }
+.prob-bar-wrapper { display: flex; align-items: center; gap: 8px; font-size: 0.65rem; color: var(--text-muted); }
+.prob-bar { flex: 1; height: 6px; background: #334155; border-radius: 3px; overflow: hidden; display: flex; }
+.prob-fill { height: 100%; background: linear-gradient(90deg, var(--cyan), var(--purple)); }
+
 .status-pill { background: var(--red); color: #fff; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 4px; }
 
 .game-selector { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 14px; }
@@ -60,5 +70,4 @@ h2 { font-size: 1rem; color: var(--cyan); text-transform: uppercase; letter-spac
 .admin-form { display: flex; gap: 6px; margin-top: 10px; }
 .admin-form input { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid rgba(157, 78, 221, 0.4); background: #070c14; color: #fff; font-size: 0.8rem; }
 .admin-btn { background: var(--purple); color: #fff; border: none; padding: 8px 12px; border-radius: 6px; font-weight: 700; font-size: 0.8rem; }
-
 .notice-card { font-size: 0.7rem; color: var(--text-muted); text-align: center; line-height: 1.4; padding: 8px; }
