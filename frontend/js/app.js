@@ -1,78 +1,163 @@
-let currentGame = 'roulette';
-const API_URL = 'http://localhost:5000/api';
+// Auto-detect local vs production backend
+const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:5000/api'
+  : 'https://subbhu-play-api.onrender.com/api';
 
-window.selectGame = function(game) {
-  currentGame = game;
-  const label = document.getElementById('active-game-label');
-  const choiceSelect = document.getElementById('game-choice');
-  
-  if (game === 'roulette') {
-    label.innerText = 'Selected: Roulette';
-    choiceSelect.innerHTML = `
-      <option value="red">Red (2x)</option>
-      <option value="black">Black (2x)</option>
-      <option value="green">Green (14x)</option>`;
-  } else if (game === 'andar-bahar') {
-    label.innerText = 'Selected: Andar Bahar';
-    choiceSelect.innerHTML = `
-      <option value="andar">Andar (1.9x)</option>
-      <option value="bahar">Bahar (1.9x)</option>`;
-  } else if (game === 'crash') {
-    label.innerText = 'Selected: Crash Game';
-    choiceSelect.innerHTML = `
-      <option value="1.5">Cash out at 1.5x</option>
-      <option value="2.0">Cash out at 2.0x</option>
-      <option value="3.0">Cash out at 3.0x</option>`;
-  } else {
-    label.innerText = 'Selected: Teen Patti';
-    choiceSelect.innerHTML = `<option value="play">Normal Hand (2x)</option>`;
+let activeGame = 'roulette';
+
+const gameConfigs = {
+  'roulette': {
+    title: 'European Roulette',
+    rule: '14x Green / 2x Red & Black',
+    options: `<option value="red">Red (2x)</option><option value="black">Black (2x)</option><option value="green">Green (14x)</option>`
+  },
+  'andar-bahar': {
+    title: 'Andar Bahar',
+    rule: '1.9x Direct Payout',
+    options: `<option value="andar">Andar (1.9x)</option><option value="bahar">Bahar (1.9x)</option>`
+  },
+  'crash': {
+    title: 'Crash Multiplier',
+    rule: 'Cash out before rocket crash',
+    options: `<option value="1.5">Cash out 1.5x</option><option value="2.0">Cash out 2.0x</option><option value="3.0">Cash out 3.0x</option>`
+  },
+  'slots': {
+    title: 'Lucky 777 Slots',
+    rule: '3 Match: up to 10x | 2 Match: 1.5x',
+    options: `<option value="spin">Spin 3-Reels</option>`
+  },
+  'blackjack': {
+    title: 'Blackjack (21)',
+    rule: 'Beat dealer without busting',
+    options: `<option value="deal">Deal Cards (2x)</option>`
+  },
+  'teen-patti': {
+    title: 'Teen Patti 3-Card',
+    rule: 'Trail / Pure Sequence wins up to 3x',
+    options: `<option value="play">Play Hand</option>`
   }
 };
 
-async function loadSports() {
+window.switchGame = function(game) {
+  activeGame = game;
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  event.target.classList.add('active');
+
+  const config = gameConfigs[game];
+  document.getElementById('active-title').innerText = config.title;
+  document.getElementById('rule-badge').innerText = config.rule;
+  document.getElementById('game-choice').innerHTML = config.options;
+  document.getElementById('game-result').innerText = 'Ready to play virtual round.';
+};
+
+async function syncWallet() {
   try {
-    const res = await fetch(`${API_URL}/sports`);
+    const res = await fetch(`${API_BASE}/wallet`);
     const data = await res.json();
-    const container = document.getElementById('sports-list');
-    container.innerHTML = data.fixtures.map(f => `
-      <div class="match-item">
-        <div>
-          <div style="font-weight:600; font-size:0.95rem;">${f.teams}</div>
-          <div style="font-size:0.75rem; color:var(--text-muted);">${f.sport} • ${f.score || f.time}</div>
+    document.getElementById('wallet-balance').innerText = `🪙 ${data.balance.toLocaleString()} Coins`;
+    
+    const ledgerEl = document.getElementById('ledger-list');
+    if (data.history && data.history.length > 0) {
+      ledgerEl.innerHTML = data.history.reverse().map(tx => `
+        <div class="tx-item">
+          <span>${tx.type} ${tx.reason ? '• ' + tx.reason : ''}</span>
+          <span style="color: ${tx.amount > 0 || tx.payout > 0 ? '#34d399' : '#f87171'}">
+            ${tx.amount ? (tx.amount > 0 ? '+' : '') + tx.amount : (tx.netChange >= 0 ? '+' : '') + tx.netChange}
+          </span>
         </div>
-        <span class="status-pill">${f.status}</span>
-      </div>
-    `).join('');
+      `).join('');
+    }
   } catch (e) {
-    document.getElementById('sports-list').innerHTML = `<p style="font-size:0.8rem; color:#f87171;">Backend connect nahi hua (Start Node backend below)</p>`;
+    console.error('Wallet sync error', e);
   }
 }
 
-window.executePlay = async function() {
-  const betAmount = Number(document.getElementById('bet-coins').value);
+async function loadSports() {
+  try {
+    const res = await fetch(`${API_BASE}/sports`);
+    const json = await res.json();
+    const list = document.getElementById('sports-list');
+    list.innerHTML = json.data.map(m => `
+      <div class="match-item">
+        <div>
+          <div style="font-weight:700; font-size:0.85rem;">${m.teams}</div>
+          <div style="font-size:0.7rem; color:var(--text-muted);">${m.sport} • ${m.score}</div>
+        </div>
+        <span class="status-pill">${m.status}</span>
+      </div>
+    `).join('');
+  } catch (err) {
+    document.getElementById('sports-list').innerHTML = `<p style="font-size:0.75rem; color:#f87171;">Start Node server to view live demo matches.</p>`;
+  }
+}
+
+window.playCurrentGame = async function() {
+  const betCoins = Number(document.getElementById('bet-coins').value);
   const choice = document.getElementById('game-choice').value;
-  const statusEl = document.getElementById('game-status');
-  statusEl.innerText = 'Simulating round...';
+  const resultEl = document.getElementById('game-result');
+  resultEl.innerText = 'Calculating simulation...';
 
   try {
-    const res = await fetch(`${API_URL}/games/play`, {
+    const res = await fetch(`${API_BASE}/games/play`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ game: currentGame, betAmount, choice })
+      body: JSON.stringify({ game: activeGame, betAmount: betCoins, choice })
     });
-    const result = await res.json();
+    const data = await res.json();
+
     if (res.ok) {
-      document.getElementById('wallet-balance').innerText = `🪙 ${result.newBalance.toLocaleString()} Coins`;
-      statusEl.innerHTML = `${result.won ? '🎉 WON' : '❌ LOST'}: ${result.detail} (${result.winAmount > 0 ? '+' + result.winAmount : '-' + betAmount} coins)`;
-      statusEl.style.color = result.won ? '#4ade80' : '#f87171';
+      resultEl.innerHTML = `${data.won ? '🎉 WIN' : '❌ LOSS'} | ${data.detail} (${data.won ? '+' + data.payout : '-' + betCoins} coins)`;
+      resultEl.style.color = data.won ? '#34d399' : '#f87171';
+      syncWallet();
     } else {
-      statusEl.innerText = result.error || 'Play error';
-      statusEl.style.color = '#f87171';
+      resultEl.innerText = data.error || 'Play error';
+      resultEl.style.color = '#f87171';
     }
   } catch (err) {
-    statusEl.innerText = 'Network error: Backend chalu kijiye.';
-    statusEl.style.color = '#f87171';
+    resultEl.innerText = 'Network error: Node Backend not reachable.';
+    resultEl.style.color = '#f87171';
   }
 };
 
+window.claimDaily = async function() {
+  try {
+    const res = await fetch(`${API_BASE}/wallet/claim-daily`, { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+      alert(`Claimed +${data.added} virtual demo coins!`);
+      syncWallet();
+    }
+  } catch (e) {
+    alert('Claim failed: Server connection required');
+  }
+};
+
+window.executeAdminAdjust = async function() {
+  const key = document.getElementById('admin-key').value;
+  const coins = document.getElementById('admin-coins').value;
+  const status = document.getElementById('admin-status');
+
+  try {
+    const res = await fetch(`${API_BASE}/admin/adjust-coins`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminKey: key, amount: coins, reason: 'Admin panel test' })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      status.innerText = `Adjusted balance: ${data.newBalance} coins`;
+      status.style.color = '#34d399';
+      syncWallet();
+    } else {
+      status.innerText = data.error || 'Admin failure';
+      status.style.color = '#f87171';
+    }
+  } catch (e) {
+    status.innerText = 'Error connecting to admin route';
+    status.style.color = '#f87171';
+  }
+};
+
+// Initial calls
 loadSports();
+syncWallet();
