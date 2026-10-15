@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Subbhu Play — Virtual Sports & Games</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="manifest" href="manifest.webmanifest">
+</head>
+<body>
+
+<header>
+  <div class="logo">⚡ SUBBHU PLAY</div>
+  <div class="badge" id="wallet-balance">🪙 5,000 Coins</div>
+</header>
+
+<main class="container">
+  <div class="card">
+    <h2>🏆 Live Demo Sports</h2>
+    <div id="sports-list">Loading sports fixtures...</div>
+  </div>
+
+  <div class="card">
+    <h2>🎮 Virtual Demo Games</h2>
+    <div class="game-grid">
+      <div class="game-btn" onclick="selectGame('roulette')">🔴 Roulette</div>
+      <div class="game-btn" onclick="selectGame('andar-bahar')">🃏 Andar Bahar</div>
+      <div class="game-btn" onclick="selectGame('crash')">🚀 Crash Game</div>
+      <div class="game-btn" onclick="selectGame('teen-patti')">🎴 Teen Patti</div>
+    </div>
+
+    <div class="play-box" id="game-controller">
+      <p id="active-game-label" style="font-size:0.9rem; color:var(--cyan);">Selected: Roulette</p>
+      <input type="number" id="bet-coins" value="100" min="10" placeholder="Coins to Play">
+      <select id="game-choice">
+        <option value="red">Red (2x)</option>
+        <option value="black">Black (2x)</option>
+        <option value="green">Green (14x)</option>
+      </select>
+      <button class="action-btn" id="play-button" onclick="executePlay()">Play Virtual Round</button>
+      <p id="game-status" style="font-size:0.85rem; margin-top:5px;"></p>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="disclaimer">
+      ⚠️ <strong>Notice:</strong> This is strictly a demonstration platform. Virtual coins hold zero real-world value. No real deposits, withdrawals or monetary betting available.
+    </p>
+  </div>
+</main>
+
+<script src="js/app.js"></script>
+</body>
+</html>
