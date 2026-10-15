@@ -4,8 +4,14 @@ import helmet from 'helmet';
 import { 
   evaluateRoulette, 
   evaluateAndarBahar, 
+  evaluateDragonTiger,
+  evaluateBaccarat,
+  evaluateSicBo,
+  evaluateHiLo,
   evaluateCrash, 
-  evaluateSlots, 
+  evaluateFruitSlots, 
+  evaluatePharaohSlots,
+  evaluateCandySlots,
   evaluateBlackjack, 
   evaluateTeenPatti 
 } from './services/gameEngine.js';
@@ -32,7 +38,7 @@ const state = {
 };
 
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', engine: 'Subbhu Play Data Science Core', virtualOnly: true, timestamp: new Date().toISOString() });
+  res.json({ status: 'ok', engine: 'Subbhu Play All-in-One Live Casino & Slots', virtualOnly: true, timestamp: new Date().toISOString() });
 });
 
 app.get('/api/sports', (req, res) => {
@@ -47,20 +53,13 @@ app.get('/api/wallet', (req, res) => {
   res.json({ 
     balance: state.wallet.balance, 
     currency: 'VIRTUAL_COIN', 
-    history: state.ledger.slice(-15) 
+    history: state.ledger.slice(-20) 
   });
 });
 
 app.get('/api/analytics/summary', (req, res) => {
   const stats = computeSessionStats(state.ledger);
-  res.json({
-    metrics: stats,
-    theoreticalModels: {
-      rouletteEV: '-2.70% (European Standard)',
-      andarBaharEV: '-1.50% (Standard Model)',
-      crashModel: 'Pareto-Bounded Random Distribution'
-    }
-  });
+  res.json({ metrics: stats });
 });
 
 app.post('/api/wallet/claim-daily', (req, res) => {
@@ -81,10 +80,10 @@ app.post('/api/games/play', (req, res) => {
   const coins = Number(betAmount);
 
   if (!coins || coins <= 0 || isNaN(coins)) {
-    return res.status(400).json({ error: 'Enter valid coin amount' });
+    return res.status(400).json({ error: 'Valid virtual coin amount required' });
   }
   if (coins > state.wallet.balance) {
-    return res.status(400).json({ error: 'Insufficient coins' });
+    return res.status(400).json({ error: 'Insufficient coins in virtual wallet' });
   }
 
   state.wallet.balance -= coins;
@@ -97,8 +96,31 @@ app.post('/api/games/play', (req, res) => {
       break;
     }
     case 'andar-bahar': {
-      const drop = Math.random() > 0.5 ? 'andar' : 'bahar';
-      outcome = evaluateAndarBahar(choice || 'andar', drop);
+      outcome = evaluateAndarBahar(choice || 'andar');
+      break;
+    }
+    case 'dragon-tiger': {
+      outcome = evaluateDragonTiger(choice || 'dragon');
+      break;
+    }
+    case 'baccarat': {
+      outcome = evaluateBaccarat(choice || 'player');
+      break;
+    }
+    case 'sic-bo': {
+      outcome = evaluateSicBo(choice || 'small');
+      break;
+    }
+    case 'hi-lo': {
+      outcome = evaluateHiLo(choice || 'hi');
+      break;
+    }
+    case 'blackjack': {
+      outcome = evaluateBlackjack();
+      break;
+    }
+    case 'teen-patti': {
+      outcome = evaluateTeenPatti();
       break;
     }
     case 'crash': {
@@ -106,20 +128,20 @@ app.post('/api/games/play', (req, res) => {
       outcome = evaluateCrash(Number(choice) || 1.5, crashPoint);
       break;
     }
-    case 'slots': {
-      outcome = evaluateSlots();
+    case 'fruit-slots': {
+      outcome = evaluateFruitSlots();
       break;
     }
-    case 'blackjack': {
-      outcome = evaluateBlackjack(choice);
+    case 'pharaoh-slots': {
+      outcome = evaluatePharaohSlots();
       break;
     }
-    case 'teen-patti': {
-      outcome = evaluateTeenPatti();
+    case 'candy-slots': {
+      outcome = evaluateCandySlots();
       break;
     }
     default:
-      return res.status(400).json({ error: 'Unknown game mode' });
+      return res.status(400).json({ error: 'Unknown game selected' });
   }
 
   const winCoins = outcome.won ? Math.floor(coins * outcome.multiplier) : 0;
@@ -147,12 +169,12 @@ app.post('/api/games/play', (req, res) => {
 app.post('/api/admin/adjust-coins', (req, res) => {
   const { adminKey, amount } = req.body;
   if (adminKey !== 'subbhu-admin-2026') {
-    return res.status(403).json({ error: 'Unauthorized admin credentials' });
+    return res.status(403).json({ error: 'Unauthorized credentials' });
   }
   state.wallet.balance += Number(amount);
   res.json({ success: true, newBalance: state.wallet.balance });
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Subbhu Play Data Science API online on ${PORT}`);
+  console.log(`Subbhu Play All Live Casino & Slots API running on port ${PORT}`);
 });

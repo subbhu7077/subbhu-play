@@ -2,51 +2,149 @@ const API_BASE = window.location.hostname === 'localhost' || window.location.hos
   ? 'http://localhost:5000/api'
   : 'https://subbhu-play-api.onrender.com/api';
 
-let activeGame = 'roulette';
+let activeCasinoGame = 'andar-bahar';
+let activeSlotGame = 'fruit-slots';
 
-const gameConfigs = {
-  'roulette': {
-    title: 'European Roulette',
-    rule: '14x Green / 2x Red & Black',
-    options: `<option value="red">Red (2x)</option><option value="black">Black (2x)</option><option value="green">Green (14x)</option>`
-  },
+const casinoConfigs = {
   'andar-bahar': {
-    title: 'Andar Bahar',
-    rule: '1.9x Direct Payout',
-    options: `<option value="andar">Andar (1.9x)</option><option value="bahar">Bahar (1.9x)</option>`
+    title: 'Andar Bahar Live',
+    rule: '1.9x Andar / 2.0x Bahar',
+    options: `<option value="andar">Andar (1.9x)</option><option value="bahar">Bahar (2.0x)</option>`
   },
-  'crash': {
-    title: 'Crash Multiplier',
-    rule: 'Cash out before crash',
-    options: `<option value="1.5">Cash out 1.5x</option><option value="2.0">Cash out 2.0x</option><option value="3.0">Cash out 3.0x</option>`
+  'dragon-tiger': {
+    title: 'Dragon Tiger Live',
+    rule: 'Highest Card Wins 2x | Tie 8x',
+    options: `<option value="dragon">Dragon (2x)</option><option value="tiger">Tiger (2x)</option><option value="tie">Tie (8x)</option>`
   },
-  'slots': {
-    title: 'Lucky 777 Slots',
-    rule: '3 Match: up to 10x | 2 Match: 1.5x',
-    options: `<option value="spin">Spin 3-Reels</option>`
+  'roulette': {
+    title: 'European Roulette Live',
+    rule: '14x Green / 2x Red, Black, Odd, Even',
+    options: `<option value="red">Red (2x)</option><option value="black">Black (2x)</option><option value="green">Green (14x)</option><option value="even">Even (2x)</option><option value="odd">Odd (2x)</option>`
   },
-  'blackjack': {
-    title: 'Blackjack (21)',
-    rule: 'Beat dealer without busting',
-    options: `<option value="deal">Deal Cards (2x)</option>`
+  'baccarat': {
+    title: 'Baccarat Punto Banco',
+    rule: 'Player 2x / Banker 1.95x / Tie 8x',
+    options: `<option value="player">Player (2x)</option><option value="banker">Banker (1.95x)</option><option value="tie">Tie (8x)</option>`
+  },
+  'sic-bo': {
+    title: 'Sic Bo Macau',
+    rule: 'Small/Big 2x | Triple 30x',
+    options: `<option value="small">Small (4-10) 2x</option><option value="big">Big (11-17) 2x</option><option value="triple">Any Triple (30x)</option>`
   },
   'teen-patti': {
     title: 'Teen Patti 3-Card',
-    rule: 'Trail / Pure Sequence wins up to 3x',
+    rule: 'Pure Sequence / Trail up to 4x',
     options: `<option value="play">Play Hand</option>`
+  },
+  'blackjack': {
+    title: 'Blackjack (21)',
+    rule: 'Beat Dealer Hand (2x)',
+    options: `<option value="deal">Deal Hand</option>`
+  },
+  'hi-lo': {
+    title: 'Hi-Lo Cards',
+    rule: 'Higher / Lower 1.85x',
+    options: `<option value="hi">Higher</option><option value="lo">Lower</option>`
+  },
+  'crash': {
+    title: 'Crash Multiplier',
+    rule: 'Cash out before explosion',
+    options: `<option value="1.5">Cash out 1.5x</option><option value="2.0">Cash out 2.0x</option><option value="3.0">Cash out 3.0x</option>`
   }
 };
 
-window.switchGame = function(game) {
-  activeGame = game;
-  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+const slotConfigs = {
+  'fruit-slots': {
+    title: 'Mega Fruit 777',
+    rule: '3 Sevens = 15x Jackpot | 2 Match = 1.5x',
+    defaultDisplay: '🍒 | 🍋 | 7️⃣'
+  },
+  'pharaoh-slots': {
+    title: "Pharaoh's Gold 5-Reel",
+    rule: '5 Crowns = 25x Jackpot | 2+ Coins = Win',
+    defaultDisplay: '🏺 🦂 👁️ 👑 🪙'
+  },
+  'candy-slots': {
+    title: 'Sweet Candy Rush',
+    rule: 'Lollipops & Candies Scatter = 5x Win',
+    defaultDisplay: '🍬 🍭 🍫 🍩'
+  }
+};
+
+window.switchCategory = function(cat) {
+  document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
   event.target.classList.add('active');
 
-  const config = gameConfigs[game];
-  document.getElementById('active-title').innerText = config.title;
-  document.getElementById('rule-badge').innerText = config.rule;
-  document.getElementById('game-choice').innerHTML = config.options;
-  document.getElementById('game-result').innerText = 'Ready to play simulation.';
+  document.querySelectorAll('.section-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById(`section-${cat}`).classList.add('active');
+};
+
+window.selectGame = function(game) {
+  activeCasinoGame = game;
+  const btns = document.querySelectorAll('#section-casino .tab-btn');
+  btns.forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+
+  const conf = casinoConfigs[game];
+  document.getElementById('casino-title').innerText = conf.title;
+  document.getElementById('casino-rule').innerText = conf.rule;
+  document.getElementById('casino-choice').innerHTML = conf.options;
+  document.getElementById('casino-result').innerText = 'Ready to deal round.';
+};
+
+window.selectSlots = function(game) {
+  activeSlotGame = game;
+  const btns = document.querySelectorAll('#section-slots .tab-btn');
+  btns.forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+
+  const conf = slotConfigs[game];
+  document.getElementById('slots-title').innerText = conf.title;
+  document.getElementById('slots-rule').innerText = conf.rule;
+  document.getElementById('slot-reel-display').innerText = conf.defaultDisplay;
+  document.getElementById('slots-result').innerText = 'Ready to spin.';
+};
+
+async function executeGameRound(gameKey, betCoins, choiceVal, resultElementId) {
+  const resultEl = document.getElementById(resultElementId);
+  resultEl.innerText = 'Evaluating round...';
+
+  try {
+    const res = await fetch(`${API_BASE}/games/play`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ game: gameKey, betAmount: betCoins, choice: choiceVal })
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      resultEl.innerHTML = `${data.won ? '🎉 WIN' : '❌ LOSS'} | ${data.detail} (${data.won ? '+' + data.payout : '-' + betCoins} coins)`;
+      resultEl.style.color = data.won ? '#34d399' : '#f87171';
+      syncWallet();
+      fetchTelemetry();
+      return data;
+    } else {
+      resultEl.innerText = data.error || 'Execution failure';
+      resultEl.style.color = '#f87171';
+    }
+  } catch (err) {
+    resultEl.innerText = 'Network error: Backend unreachable.';
+    resultEl.style.color = '#f87171';
+  }
+}
+
+window.playCasino = function() {
+  const bet = Number(document.getElementById('casino-bet').value);
+  const choice = document.getElementById('casino-choice').value;
+  executeGameRound(activeCasinoGame, bet, choice, 'casino-result');
+};
+
+window.spinSlots = async function() {
+  const bet = Number(document.getElementById('slots-bet').value);
+  const data = await executeGameRound(activeSlotGame, bet, 'spin', 'slots-result');
+  if (data && data.detail) {
+    document.getElementById('slot-reel-display').innerText = data.detail;
+  }
 };
 
 async function fetchTelemetry() {
@@ -58,9 +156,7 @@ async function fetchTelemetry() {
     document.getElementById('stat-roi').innerText = `${m.roi}%`;
     document.getElementById('stat-rounds').innerText = m.totalRounds;
     document.getElementById('stat-volatility').innerText = m.volatility;
-  } catch(e) {
-    console.error('Analytics telemetry error', e);
-  }
+  } catch(e) {}
 }
 
 async function syncWallet() {
@@ -80,9 +176,7 @@ async function syncWallet() {
         </div>
       `).join('');
     }
-  } catch (e) {
-    console.error('Wallet sync error', e);
-  }
+  } catch (e) {}
 }
 
 async function loadSports() {
@@ -108,39 +202,8 @@ async function loadSports() {
         </div>
       </div>
     `).join('');
-  } catch (err) {
-    document.getElementById('sports-list').innerHTML = `<p style="font-size:0.75rem; color:#f87171;">Node server required for sports analytics.</p>`;
-  }
+  } catch (err) {}
 }
-
-window.playCurrentGame = async function() {
-  const betCoins = Number(document.getElementById('bet-coins').value);
-  const choice = document.getElementById('game-choice').value;
-  const resultEl = document.getElementById('game-result');
-  resultEl.innerText = 'Processing simulation...';
-
-  try {
-    const res = await fetch(`${API_BASE}/games/play`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ game: activeGame, betAmount: betCoins, choice })
-    });
-    const data = await res.json();
-
-    if (res.ok) {
-      resultEl.innerHTML = `${data.won ? '🎉 WIN' : '❌ LOSS'} | ${data.detail} (${data.won ? '+' + data.payout : '-' + betCoins} coins)`;
-      resultEl.style.color = data.won ? '#34d399' : '#f87171';
-      syncWallet();
-      fetchTelemetry();
-    } else {
-      resultEl.innerText = data.error || 'Execution failure';
-      resultEl.style.color = '#f87171';
-    }
-  } catch (err) {
-    resultEl.innerText = 'Network error: Backend unreachable.';
-    resultEl.style.color = '#f87171';
-  }
-};
 
 window.claimDaily = async function() {
   try {
@@ -151,9 +214,7 @@ window.claimDaily = async function() {
       syncWallet();
       fetchTelemetry();
     }
-  } catch (e) {
-    alert('Daily claim failed');
-  }
+  } catch (e) {}
 };
 
 window.executeAdminAdjust = async function() {
@@ -176,10 +237,7 @@ window.executeAdminAdjust = async function() {
       status.innerText = data.error;
       status.style.color = '#f87171';
     }
-  } catch (e) {
-    status.innerText = 'Error connecting admin API';
-    status.style.color = '#f87171';
-  }
+  } catch (e) {}
 };
 
 loadSports();

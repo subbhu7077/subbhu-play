@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Subbhu Play — Data Science & Gaming Hub</title>
+  <title>Subbhu Play — Live Casino, Slots & Sports</title>
   <link rel="stylesheet" href="css/main.css">
   <link rel="manifest" href="manifest.webmanifest">
 </head>
 <body>
 
 <header>
-  <div class="logo">⚡ SUBBHU PLAY <span style="font-size:0.6rem; color:var(--cyan); letter-spacing:1px;">DATA CORE</span></div>
+  <div class="logo">⚡ SUBBHU PLAY <span class="vip-badge">MASTER</span></div>
   <div class="header-right">
     <button class="claim-btn" onclick="claimDaily()">+ Refill</button>
     <div class="badge" id="wallet-balance">🪙 103,700 Coins</div>
@@ -19,11 +19,11 @@
 
 <main class="container">
 
-  <!-- Real-Time Data Science Metrics -->
+  <!-- Analytics Telemetry -->
   <div class="card analytics-card">
     <div class="card-title">
-      <h2>📊 Live Data Analytics</h2>
-      <span class="demo-tag">REAL-TIME TELEMETRY</span>
+      <h2>📊 Live Data Telemetry</h2>
+      <span class="demo-tag">REAL-TIME</span>
     </div>
     <div class="stats-grid">
       <div class="stat-box">
@@ -36,7 +36,7 @@
       </div>
       <div class="stat-box">
         <span class="stat-num" id="stat-rounds">0</span>
-        <span class="stat-lbl">Completed Rounds</span>
+        <span class="stat-lbl">Total Rounds</span>
       </div>
       <div class="stat-box">
         <span class="stat-num" id="stat-volatility">0.0</span>
@@ -45,68 +45,114 @@
     </div>
   </div>
 
-  <!-- Sports Fixtures with Predictive Probability Bars -->
-  <div class="card">
-    <div class="card-title">
-      <h2>🏆 Predictive Sports Analytics</h2>
-      <span class="demo-tag">MONTE CARLO PROBABILITY</span>
-    </div>
-    <div id="sports-list" class="sports-container">Loading predictions...</div>
+  <!-- Category Nav -->
+  <div class="category-tabs">
+    <button class="cat-pill active" onclick="switchCategory('casino')">🎲 LIVE CASINO</button>
+    <button class="cat-pill" onclick="switchCategory('slots')">🎰 SLOTS MANIA</button>
+    <button class="cat-pill" onclick="switchCategory('sports')">🏆 SPORTS PREDICTOR</button>
   </div>
 
-  <!-- Virtual Games Suite -->
-  <div class="card">
-    <div class="card-title">
-      <h2>🎮 Virtual 6-Game Suite</h2>
-      <span class="demo-tag">SIMULATED MATH</span>
-    </div>
-
-    <div class="game-selector">
-      <button class="tab-btn active" onclick="switchGame('roulette')">🔴 Roulette</button>
-      <button class="tab-btn" onclick="switchGame('andar-bahar')">🃏 Andar Bahar</button>
-      <button class="tab-btn" onclick="switchGame('crash')">🚀 Crash (x)</button>
-      <button class="tab-btn" onclick="switchGame('slots')">🎰 777 Slots</button>
-      <button class="tab-btn" onclick="switchGame('blackjack')">♠️ Blackjack</button>
-      <button class="tab-btn" onclick="switchGame('teen-patti')">🎴 Teen Patti</button>
-    </div>
-
-    <div class="game-box">
-      <div class="game-meta">
-        <span id="active-title" style="font-weight:700; color:var(--cyan);">European Roulette</span>
-        <span id="rule-badge" class="rule-badge">14x Green / 2x Red-Black</span>
+  <!-- Live Casino Section -->
+  <div id="section-casino" class="section-pane active">
+    <div class="card">
+      <div class="card-title">
+        <h2>🎪 Live Dealer Tables</h2>
+        <span class="demo-tag">SIMULATED DEALER</span>
+      </div>
+      <div class="game-selector-grid">
+        <button class="tab-btn active" onclick="selectGame('andar-bahar')">🃏 Andar Bahar</button>
+        <button class="tab-btn" onclick="selectGame('dragon-tiger')">🐉 Dragon Tiger</button>
+        <button class="tab-btn" onclick="selectGame('roulette')">🔴 Roulette</button>
+        <button class="tab-btn" onclick="selectGame('baccarat')">👑 Baccarat</button>
+        <button class="tab-btn" onclick="selectGame('sic-bo')">🎲 Sic Bo</button>
+        <button class="tab-btn" onclick="selectGame('teen-patti')">🎴 Teen Patti</button>
+        <button class="tab-btn" onclick="selectGame('blackjack')">♠️ Blackjack</button>
+        <button class="tab-btn" onclick="selectGame('hi-lo')">📈 Hi-Lo</button>
+        <button class="tab-btn" onclick="selectGame('crash')">🚀 Crash Rocket</button>
       </div>
 
-      <div class="form-group">
-        <label>Virtual Stake:</label>
-        <input type="number" id="bet-coins" value="100" min="10" step="50">
-      </div>
+      <div class="game-controller-box">
+        <div class="game-meta">
+          <span id="casino-title" style="font-weight:700; color:var(--cyan);">Andar Bahar Live</span>
+          <span id="casino-rule" class="rule-badge">1.9x Andar / 2.0x Bahar</span>
+        </div>
 
-      <div class="form-group" id="choice-wrapper">
-        <label id="choice-label">Pick Option:</label>
-        <select id="game-choice">
-          <option value="red">Red (2x)</option>
-          <option value="black">Black (2x)</option>
-          <option value="green">Green (14x)</option>
-        </select>
-      </div>
+        <div class="form-group">
+          <label>Virtual Stake Coins:</label>
+          <input type="number" id="casino-bet" value="100" min="10" step="50">
+        </div>
 
-      <button class="action-btn" id="play-button" onclick="playCurrentGame()">Play Demo Round</button>
-      <div id="game-result" class="result-banner">Select stake and options to begin.</div>
+        <div class="form-group">
+          <label>Place Bet On:</label>
+          <select id="casino-choice">
+            <option value="andar">Andar (1.9x)</option>
+            <option value="bahar">Bahar (2.0x)</option>
+          </select>
+        </div>
+
+        <button class="action-btn" onclick="playCasino()">Deal Live Round</button>
+        <div id="casino-result" class="result-banner">Table ready. Place bet to play.</div>
+      </div>
     </div>
   </div>
 
-  <!-- Virtual Ledger History -->
+  <!-- Slots Section -->
+  <div id="section-slots" class="section-pane">
+    <div class="card">
+      <div class="card-title">
+        <h2>🎰 Vegas Slots Lobby</h2>
+        <span class="demo-tag">VIRTUAL JACKPOTS</span>
+      </div>
+      <div class="game-selector-grid slots-grid">
+        <button class="tab-btn active" onclick="selectSlots('fruit-slots')">🍒 Fruit 777</button>
+        <button class="tab-btn" onclick="selectSlots('pharaoh-slots')">🏺 Pharaoh's Gold</button>
+        <button class="tab-btn" onclick="selectSlots('candy-slots')">🍬 Sweet Candy Rush</button>
+      </div>
+
+      <div class="game-controller-box">
+        <div class="game-meta">
+          <span id="slots-title" style="font-weight:700; color:var(--cyan);">Mega Fruit 777</span>
+          <span id="slots-rule" class="rule-badge">3 Sevens = 15x Jackpot</span>
+        </div>
+
+        <div class="slot-display-screen" id="slot-reel-display">
+          🎰 | 🎰 | 🎰
+        </div>
+
+        <div class="form-group">
+          <label>Spin Stake (Coins):</label>
+          <input type="number" id="slots-bet" value="100" min="10" step="50">
+        </div>
+
+        <button class="action-btn spin-btn" onclick="spinSlots()">SPIN REELS</button>
+        <div id="slots-result" class="result-banner">Spin the reels to win payouts!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sports Section -->
+  <div id="section-sports" class="section-pane">
+    <div class="card">
+      <div class="card-title">
+        <h2>🏆 Predictive Sports Analytics</h2>
+        <span class="demo-tag">PROBABILITY</span>
+      </div>
+      <div id="sports-list" class="sports-container">Loading fixtures...</div>
+    </div>
+  </div>
+
+  <!-- Transaction Ledger -->
   <div class="card">
     <h2>📜 Real-Time Ledger Transactions</h2>
     <div id="ledger-list" class="ledger-box">Loading transactions...</div>
   </div>
 
-  <!-- Admin Adjust Controls -->
+  <!-- Admin Controls -->
   <div class="card admin-card">
-    <h2>⚙️ Platform Governance</h2>
+    <h2>⚙️ Platform Administration</h2>
     <div class="admin-form">
       <input type="password" id="admin-key" placeholder="Admin Secret Key">
-      <input type="number" id="admin-coins" placeholder="Coin Adjustment (+/-)">
+      <input type="number" id="admin-coins" placeholder="Adjustment (+/-)">
       <button class="admin-btn" onclick="executeAdminAdjust()">Execute</button>
     </div>
     <p id="admin-status" style="font-size:0.75rem; margin-top:5px;"></p>
